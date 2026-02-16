@@ -1,0 +1,34 @@
+name: Node.js CI (Reusable)
+
+on:
+  workflow_call:  # This makes the workflow reusable
+    inputs:
+      node-version:
+        required: true
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Publish to npm (optional)
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
