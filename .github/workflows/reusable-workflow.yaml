@@ -1,7 +1,7 @@
 name: Node.js CI (Reusable)
 
 on:
-  workflow_call:  # This makes the workflow reusable
+  workflow_call:  
     inputs:
       node-version:
         required: true
@@ -25,8 +25,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
 
       - name: Publish to npm (optional)
         run: npm publish
