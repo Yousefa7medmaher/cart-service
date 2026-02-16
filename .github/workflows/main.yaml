@@ -1,0 +1,14 @@
+name: Main Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  call-nodejs-ci:
+    uses: ./.github/workflows/reusable-workflow.yaml
+    with:
+      node-version: '18'                 
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} 
