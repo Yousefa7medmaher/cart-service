@@ -6,10 +6,6 @@ on:
       node-version:
         required: true
         type: string
-    secrets:
-      NPM_TOKEN:
-        required: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,8 +21,3 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-
-      - name: Publish to npm (optional)
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
