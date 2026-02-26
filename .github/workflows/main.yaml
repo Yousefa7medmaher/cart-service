@@ -49,5 +49,5 @@ jobs:
           context: .
           push: true
           tags: |
-            yousef2005/product-service:latest
-            yousef2005/product-service:${{ github.sha }}
+            yousef2005/cart-service:latest
+            yousef2005/cart-service:${{ github.sha }}
