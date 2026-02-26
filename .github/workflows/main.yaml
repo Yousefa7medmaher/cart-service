@@ -17,25 +17,36 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    needs: call-nodejs-ci
     services:
       mongo:
         image: mongo:6.0
         ports:
           - 27017:27017
-        options: --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'" --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
     env:
       MONGO_URI: mongodb://localhost:27017/cartdb
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
+      - name: Wait for MongoDB
+        run: |
+          until mongo --host localhost --eval "print(\"MongoDB is up\")"; do sleep 2; done
       - name: Start server
-        run: node src/server.js &
+        run: nohup node src/server.js > server.log 2>&1 &
       - name: Run tests
-        run: node ./test-cart.js 
+        run: node ./test-cart.js
+
   build-push-dockerapp:
     runs-on: ubuntu-latest
     needs:
@@ -57,3 +68,4 @@ jobs:
           tags: |
             yousef2005/cart-service:latest
             yousef2005/cart-service:${{ github.sha }}
+            yousef2005/cart-service:1.0.${{ github.run_number }}
