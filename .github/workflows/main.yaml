@@ -27,6 +27,8 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm ci
+      - name: Start server
+        run: node src/server.js &
       - name: Test API
         run: node ./test-cart.js
  
