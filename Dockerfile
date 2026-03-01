@@ -11,7 +11,9 @@ COPY . .
 FROM node:18-alpine
 WORKDIR /app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && apk add --no-cache curl
+RUN apk add --no-cache curl \
+    && addgroup appgroup \
+    && adduser -D -G appgroup appuser
 COPY --from=builder --chown=appuser:appgroup /app .
 
 USER appuser
