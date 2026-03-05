@@ -24,17 +24,13 @@ export const getProductById = async (productId, token) => {
     
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Product not found');
+    throw new Error(error.response?.data?.message || 'Product not found', { cause: error });
   }
 };
 
 export const validateProducts = async (productIds, token) => {
-  try {
-    const promises = productIds.map(id => getProductById(id, token));
-    return await Promise.all(promises);
-  } catch (error) {
-    throw error;
-  }
+  const promises = productIds.map(id => getProductById(id, token));
+  return await Promise.all(promises);
 };
 
 /**
@@ -45,32 +41,27 @@ export const validateProducts = async (productIds, token) => {
  * @returns {Promise<Object>} A promise that resolves to an object containing a boolean indicating if the product is available and the product itself
  */
 export const checkProductStock = async (productId, quantity, token) => {
-  try {
-    const product = await getProductById(productId, token);
-    
-    if (!product) {
-      return { 
-        available: false, 
-        product: null,
-        message: 'Product not found'
-      };
-    }
-    
-    // Check stock field (not inStock boolean)
-    if (!product.stock || product.stock < quantity) {
-      return { 
-        available: false, 
-        product,
-        message: `Insufficient stock. Available: ${product.stock || 0}, Requested: ${quantity}`
-      };
-    }
-    
+  const product = await getProductById(productId, token);
+
+  if (!product) {
     return { 
-      available: true, 
-      product,
-      message: 'Stock available'
+      available: false, 
+      product: null,
+      message: 'Product not found'
     };
-  } catch (error) {
-    throw error;
   }
+
+  if (!product.stock || product.stock < quantity) {
+    return { 
+      available: false, 
+      product,
+      message: `Insufficient stock. Available: ${product.stock || 0}, Requested: ${quantity}`
+    };
+  }
+
+  return { 
+    available: true, 
+    product,
+    message: 'Stock available'
+  };
 };

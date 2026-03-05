@@ -25,8 +25,24 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', service: 'Cart Service', timestamp: new Date() });
 });
 
+
+app.get('/ready', async (req, res) => {
+  try {
+    // Example: check if database connection is ready
+    if (connectDB.isConnected && connectDB.isConnected()) {
+      res.json({ status: 'READY', service: 'Cart Service', timestamp: new Date() });
+    } else {
+      res.status(503).json({ status: 'NOT_READY', service: 'Cart Service', timestamp: new Date() });
+    }
+  } catch (err) {
+    res.status(503).json({ status: 'NOT_READY', error: err.message, service: 'Cart Service', timestamp: new Date() });
+  }
+});
+
+
+
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error(err.stack);
   res.status(500).json({ 
     success: false, 
