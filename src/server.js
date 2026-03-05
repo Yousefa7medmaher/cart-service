@@ -26,19 +26,17 @@ app.get('/health', (req, res) => {
 });
 
 
-app.get('/ready', async (req, res) => {
-  try {
-    // Example: check if database connection is ready
-    if (connectDB.isConnected && connectDB.isConnected()) {
-      res.json({ status: 'READY', service: 'Cart Service', timestamp: new Date() });
-    } else {
-      res.status(503).json({ status: 'NOT_READY', service: 'Cart Service', timestamp: new Date() });
-    }
-  } catch (err) {
-    res.status(503).json({ status: 'NOT_READY', error: err.message, service: 'Cart Service', timestamp: new Date() });
+import mongoose from 'mongoose';
+
+app.get('/ready', (req, res) => {
+  const state = mongoose.connection.readyState;
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  if (state === 1) {
+    res.json({ status: 'READY', service: 'Cart Service', timestamp: new Date() });
+  } else {
+    res.status(503).json({ status: 'NOT_READY', service: 'Cart Service', timestamp: new Date() });
   }
 });
-
 
 
 // Error handling middleware
