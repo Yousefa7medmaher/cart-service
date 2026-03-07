@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-cart
+  labels:
+    app: my-mongo-app
+spec:
+  clusterIP: None
+  selector:
+    app: my-mongo-app
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1 
+kind: StatefullSet 
+metadata:
+  name: mongo-cart
+  labels:
+    app: my-mongo-app
+spec:
+  serviceName: mongo-cart
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-mongo-app
+  template:
+    metadata:
+      labels:
+        app: my-mongo-app
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6.0
+          ports:
+            - containerPort: 27017
+              name: mongo
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_INITDB_ROOT_PASSWORD
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

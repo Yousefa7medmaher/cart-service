@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-cart-app
+  labels:
+    app: my-cart-app
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: my-cart-app
+  template:
+    metadata:
+      labels:
+        app: my-cart-app
+    spec:
+      containers:
+        - name: my-cart
+          image: yousef2005/cart-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "100Mi"
+            limits:
+              cpu: "500m"
+              memory: "300Mi"
+          envFrom:
+            - secretRef:
+                name: cart-secret
+            - configMapRef:
+                name: cart-config 
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 10
