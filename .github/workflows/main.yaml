@@ -44,26 +44,32 @@ jobs:
       - name: Run tests
         run: node ./test-cart.js
       
-  build-push-dockerapp:
+  cd:
     runs-on: ubuntu-latest
     environment: production
     needs:
       - call-nodejs-ci
       - test
+    if: github.ref_name == 'master' 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Docker Login 
-        uses: docker/login-action@v3
+      
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERUSERNAME }}
-          password: ${{ secrets.DOCKERPASSWORD }} 
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v6
+           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: "Build and push the image" 
+        uses:  docker/build-push-action@v5 
         with:
-          context: .
+          context: . 
           push: true
           tags: |
-            yousef2005/cart-service:latest
-            yousef2005/cart-service:${{ github.sha }}
-            yousef2005/cart-service:1.0.${{ github.run_number }}
+             484907510239.dkr.ecr.us-east-1.amazonaws.com/cart-service:v1.${{github.run_number}}
+             484907510239.dkr.ecr.us-east-1.amazonaws.com/cart-service:latest
+             484907510239.dkr.ecr.us-east-1.amazonaws.com/cart-service:v1.${{github.sha}}
