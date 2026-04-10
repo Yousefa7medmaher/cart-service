@@ -44,7 +44,7 @@ jobs:
       - name: Run tests
         run: node ./test-cart.js
       
-  cd:
+  build-and-push:
     runs-on: ubuntu-latest
     environment: production
     needs:
